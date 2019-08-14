@@ -66,7 +66,8 @@ class Ometria_Core_Helper_Cookiechannel extends Mage_Core_Helper_Abstract {
     public function sendCookie(){
         if (!$this->cookie_did_change) return;
         $cookie = isset($_COOKIE[self::COOKIE_NAME]) ? $_COOKIE[self::COOKIE_NAME] : '';
-        Mage::getModel('core/cookie')->set(self::COOKIE_NAME, $cookie, 0, '/');
+        //Mage::getModel('core/cookie')->set(self::COOKIE_NAME, $cookie, 0, '/');
+        setcookie(self::COOKIE_NAME, $cookie, 0, '/');
         $this->cookie_did_change = false;
     }
 }
