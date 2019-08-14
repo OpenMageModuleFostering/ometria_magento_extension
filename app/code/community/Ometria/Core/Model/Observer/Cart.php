@@ -4,33 +4,38 @@ class Ometria_Core_Model_Observer_Cart {
 
 
     public function basketUpdated(Varien_Event_Observer $observer){
+
+        $ometria_config_helper = Mage::helper('ometria/config');
+        if (!$ometria_config_helper->isConfigured()) return;
+
         // Return if admin area or API call
         if (Mage::app()->getStore()->isAdmin()) return;
         if (Mage::getSingleton('api/server')->getAdapter() != null) return;
 
-        $this->updateBasketCookie();
+        $cart = $observer->getEvent()->getCart();
+        if ($cart){
+            $quote = $cart->getQuote();
+            if ($quote) $this->updateBasketCookie($quote);
+        }
     }
 
-    public function updateBasketCookie() {
+    public function updateBasketCookie($quote) {
 
         $ometria_product_helper = Mage::helper('ometria/product');
         $ometria_cookiechannel_helper = Mage::helper('ometria/cookiechannel');
 
-        # Might not be updated @BUG
-        $cart = Mage::getModel('checkout/cart')->getQuote();
-
-        $cart_token = substr(md5($cart->created_at.$cart->getId()),0,12);
+        $cart_token = substr(md5($quote->created_at.$quote->getId()),0,12);
 
         $command = array(
                 'basket',
-                $cart->getId(),
-                $cart->getGrandTotal(),
+                $quote->getId(),
+                $quote->getGrandTotal(),
                 Mage::app()->getStore()->getCurrentCurrencyCode(),
                 $cart_token
                 );
 
         $count = 0;
-        foreach($cart->getAllVisibleItems() as $item){
+        foreach($quote->getAllVisibleItems() as $item){
 
             $product =  Mage::getModel('catalog/product')->load($item->getProductId());
             $buffer = array(
@@ -50,9 +55,9 @@ class Ometria_Core_Model_Observer_Cart {
         $ometria_cookiechannel_helper->addCommand($command, true);
 
         // Identify if needed
-        if ($cart->getCustomerEmail()) {
+        if ($quote->getCustomerEmail()) {
             $identify_type = 'checkout_billing';
-            $data = array('e'=>$cart->getCustomerEmail());
+            $data = array('e'=>$quote->getCustomerEmail());
             $command = array('identify', $identify_type, http_build_query($data));
             $ometria_cookiechannel_helper->addCommand($command, true);
         }
@@ -61,6 +66,9 @@ class Ometria_Core_Model_Observer_Cart {
     }
 
     public function orderPlaced(Varien_Event_Observer $observer){
+
+        $ometria_config_helper = Mage::helper('ometria/config');
+        if (!$ometria_config_helper->isConfigured()) return;
 
         $ometria_session_helper = Mage::helper('ometria/session');
         $ometria_cookiechannel_helper = Mage::helper('ometria/cookiechannel');

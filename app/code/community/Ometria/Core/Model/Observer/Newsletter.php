@@ -2,6 +2,9 @@
 
 class Ometria_Core_Model_Observer_Newsletter {
     public function handleSubscriberUpdate(Varien_Event_Observer $observer){
+        $ometria_config_helper = Mage::helper('ometria/config');
+        if (!$ometria_config_helper->isConfigured()) return;
+
         $ometria_ping_helper = Mage::helper('ometria/ping');
 
         $subscriber = $observer->getEvent()->getSubscriber();

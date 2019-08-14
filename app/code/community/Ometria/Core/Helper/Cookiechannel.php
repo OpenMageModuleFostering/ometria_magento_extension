@@ -11,7 +11,7 @@ class Ometria_Core_Helper_Cookiechannel extends Mage_Core_Helper_Abstract {
 
         // Return if admin area or API call
         if (Mage::app()->getStore()->isAdmin()) return;
-        //if (Mage::getSingleton('api/server')->getAdapter() != null) return;
+        if (Mage::getSingleton('api/server')->getAdapter() != null) return;
         if (isset($_SERVER['REQUEST_URI']) && stripos($_SERVER['REQUEST_URI'], "/api")) return;
 
         $ometria_config_helper = Mage::helper('ometria/config');
