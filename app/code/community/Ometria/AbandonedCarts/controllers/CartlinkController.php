@@ -12,8 +12,8 @@ class Ometria_AbandonedCarts_CartlinkController extends Mage_Checkout_CartContro
         $helper = Mage::helper('ometria_abandonedcarts/config');
 
         if (!$helper->isDeeplinkEnabled()){
-                $this->_redirect('');
-                return;
+            $this->doRedirect('');
+            return;
         }
 
         $token = $this->getRequest()->getParam('token');
@@ -26,7 +26,7 @@ class Ometria_AbandonedCarts_CartlinkController extends Mage_Checkout_CartContro
 
             if (!$quote || !$quote->getId()){
                 $session->addNotice($message_incorrect_link);
-                $this->_redirect('');
+                $this->doRedirect('');
                 return;
             }
 
@@ -35,7 +35,7 @@ class Ometria_AbandonedCarts_CartlinkController extends Mage_Checkout_CartContro
 
                 if ($token!=$computed_token) {
                     $session->addNotice($message_incorrect_link);
-                    $this->_redirect('');
+                    $this->doRedirect('');
                     return;
                 }
             }
@@ -47,12 +47,27 @@ class Ometria_AbandonedCarts_CartlinkController extends Mage_Checkout_CartContro
 
             $cart_path = $helper->getCartUrl();
             if (substr($cart_path,0,7)=='http://' || substr($cart_path,0,8)=='https://'){
-                $this->_redirectUrl($cart_path);
+                $this->doRedirect($cart_path);
             } else {
-                $this->_redirect($cart_path);
+                $this->doRedirect($cart_path);
             }
         } else {
-            $this->_redirect('');
+            $this->doRedirect('');
         }
+    }
+
+    // Do redirect without stripping out utm_ params
+    private function doRedirect($url){
+        if (substr($url,0,7)=='http://' || substr($url,0,8)=='https://'){
+            // pass
+        } else {
+            $url = Mage::getUrl($url);
+        }
+        if ($_GET){
+            $qs = http_build_query($_GET);
+            $separator = (parse_url($url, PHP_URL_QUERY) == NULL) ? '?' : '&';
+            $url .= $separator . $qs;
+        }
+        $this->_redirectUrl($url);
     }
 }
