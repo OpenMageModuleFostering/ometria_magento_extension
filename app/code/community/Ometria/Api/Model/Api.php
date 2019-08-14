@@ -5,7 +5,8 @@ class Ometria_Api_Model_Api extends Mage_Api_Model_Resource_Abstract {
      * Return current Ometria API version
      */
     public function version(){
-        return "3.0";
+        $version = current(Mage::getConfig()->getModuleConfig('Ometria_Api')->version);
+        return array("branch"=>"new", "version"=>$version);
     }
 
     public function get_stock_levels($ids){
@@ -198,10 +199,14 @@ class Ometria_Api_Model_Api extends Mage_Api_Model_Resource_Abstract {
         $product = Mage::getModel('catalog/product');
         $productMediaConfig = Mage::getModel('catalog/product_media_config');
 
+        $attribute_ids_per_store = $this->_getProductAttributeIdAndNameMapping();
+        $product_per_store_attributes = $this->_loadProductPerStoreAttributes($ids, $attribute_ids_per_store);
+
+        $website_store_ids = $this->_getWebsitesIdStoreIdsMapping(null);
+
+        $parent_product_ids = $this->_getParentProductsMapping($ids);
 
         $m = new Mage_Catalog_Model_Product_Api();
-
-        $rewrites = $this->_load_product_rewrites($ids);
 
         $ret = array();
         foreach($ids as $id){
@@ -216,12 +221,13 @@ class Ometria_Api_Model_Api extends Mage_Api_Model_Resource_Abstract {
 
                 // Additional code to return parent information if available
                 if ($info['type'] == "simple"){
-                    if($parentIds = $configurable_product_model->getParentIdsByChild($info['product_id'])) {
-                        $info['parent_product_ids'] = $parentIds;
+                    if (isset($parent_product_ids[$id])) {
+                        $info['parent_product_ids'] = array($parent_product_ids[$id]);
                     }
                 }
 
                 // Get Image URL
+                // @todo this can be removed and using $listing[0] in future
                 $product->load($id);
                 if ($product && $product->getId()==$info['product_id']){
                     $imageUrl = $productMediaConfig->getMediaUrl($product->getSmallImage());
@@ -232,19 +238,13 @@ class Ometria_Api_Model_Api extends Mage_Api_Model_Resource_Abstract {
                     $info['image_thumb_url'] = $imageUrl;
                 }
 
-                // URLs
-                $info['urls'] = isset($rewrites[$id]) ? array_values($rewrites[$id]) : array();
+                $website_ids = $info['websites'];
+                $store_ids = $this->_getStoreIdsForWebsiteIds($website_ids, $website_store_ids);
+                $info['stores'] = $store_ids;
 
-                // Stock
-                try{
-                    $stock_item = Mage::getModel('cataloginventory/stock_item')->loadByProduct($id);
-                    $stock = array();
-                    $stock['qty'] = $stock_item->getQty();
-                    $stock['is_in_stock'] = $stock_item->getIsInStock();
-                    $info['stock'] = $stock;
-                } catch(Exception $e){
-                    // pass
-                }
+                $listings = isset($product_per_store_attributes[$id]) ? $product_per_store_attributes[$id] : array();
+                $listings = $this->_resolveStoreListings($listings, $store_ids, $productMediaConfig);
+                $info['store_listings'] = $listings;
 
             } catch(Exception $e){
                 $info = false;
@@ -254,51 +254,144 @@ class Ometria_Api_Model_Api extends Mage_Api_Model_Resource_Abstract {
         return $ret;
     }
 
-    private function _load_product_rewrites($ids){
-        if (!$ids) return array();
-        try{
-            $db = Mage::getSingleton('core/resource')->getConnection('core_read');
-            $core_resource = Mage::getSingleton('core/resource');
+    // Get list of attribute_id => attribute_code pairs for product attributes we are interested in
+    private function _getProductAttributeIdAndNameMapping(){
 
-            $select = $db->select()
-                ->from(
-                    array(
-                        's' => $core_resource->getTableName('core_url_rewrite')
-                        ),
-                    array('store_id', 'product_id','request_path')
-                    )
-                ->where('product_id IN (?)', $ids)
-                ->order(new Zend_Db_Expr('category_id IS NOT NULL DESC'));
+        $attribute_codes = array(
+            'name',
+            'status',
+            'visibility',
+            'price',
+            'special_price',
+            'url_path',
+            'image',
+            'small_image',
+            'thumbnail'
+            );
 
-            $rows =  $db->fetchAll($select);
+        $db = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $core_resource = Mage::getSingleton('core/resource');
 
-            $ret = array();
+        $select = $db->select()
+            ->from(
+                array('ea' => $core_resource->getTableName('eav_attribute')),
+                array('attribute_id','attribute_code')
+                )
+            ->joinLeft(
+                array('et' => $core_resource->getTableName('eav_entity_type')),
+                'ea.entity_type_id = et.entity_type_id',
+                array()
+                )
+            ->where('ea.attribute_code IN (?)', $attribute_codes)
+            ->where('et.entity_type_code = ?', 'catalog_product');
 
-            $store_url_cache = array();
+        $rows = $db->fetchAll($select);
+        $ret = array();
 
-            foreach($rows as $row){
-                $product_id = $row['product_id'];
-                $store_id = $row['store_id'];
+        foreach($rows as $row){
+            $ret[$row['attribute_id']] = $row['attribute_code'];
+        }
 
-                if (!isset($store_url_cache[$store_id])) {
-                    $store_url_cache[$store_id]=Mage::app()
-                        ->getStore($store_id)
-                        ->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
-                }
+        return $ret;
+    }
 
-                $store_url = rtrim($store_url_cache[$store_id], '/').'/';
+    // Map overridden eav_attributes onto one listing per store
+    // using defaults where no override exists for that store
+    private function _resolveStoreListings($listings, $store_ids, $productMediaConfig){
+        if (!isset($listings[0])) return array();
 
-                $ret[$product_id][$store_id] = array(
-                    'store'=>$store_id,
-                    'url' => $store_url.$row['request_path']
-                    );
+        $ret = array();
+        $default = $listings[0];
+
+        $store_url_cache = array();
+        $store_currency_cache = array();
+
+        foreach($store_ids as $store_id){
+            $listing = $default;
+            if (isset($listings[$store_id])){
+                $listing = array_merge($listing, $listings[$store_id]);
             }
 
-            return $ret;
-        } catch (Exception $e) {
-            return array();
+            if (!isset($store_url_cache[$store_id])) {
+                $store = Mage::app()->getStore($store_id);
+                $store_url_cache[$store_id]= $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
+                $store_currency_cache[$store_id] = array($store->getBaseCurrencyCode(), $store->getCurrentCurrencyCode());
+            }
+
+            if (isset($listing['url_path'])){
+                $store_base_url = rtrim($store_url_cache[$store_id], '/').'/';
+                $listing['url'] = $store_base_url . $listing['url_path'];
+                unset($listing['url_path']);
+            }
+
+            $image_keys = array('image','thumbnail','small_image');
+            foreach($image_keys as $key){
+                if (isset($listing[$key])){
+                    $listing[$key.'_url'] = $productMediaConfig->getMediaUrl($listing[$key]);
+                    unset($listing[$key]);
+                }
+            }
+
+            $store_currency_info = $store_currency_cache[$store_id];
+            $listing['store_currency'] = $store_currency_info[1];
+
+            if (isset($listing['price'])){
+                $store_price = Mage::helper('directory')->currencyConvert($listing['price'], $store_currency_info[0], $store_currency_info[1]);
+                $listing['store_price'] = $store_price;
+            }
+            if (isset($listing['special_price'])){
+                $store_price = Mage::helper('directory')->currencyConvert($listing['special_price'], $store_currency_info[0], $store_currency_info[1]);
+                $listing['store_special_price'] = $store_price;
+            }
+
+            $listing['store_id'] = $store_id;
+            $ret[] = $listing;
+        }
+
+        return $ret;
+    }
+
+    // For a given list of products load all the per store eav attribute values
+    private function _loadProductPerStoreAttributes($ids, $attribute_types){
+        if (!$attribute_types) return array();
+        $attribute_ids = array_keys($attribute_types);
+
+        $db = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $core_resource = Mage::getSingleton('core/resource');
+
+        $ret = array();
+        $this-> _loadProductPerStoreAttributesValues($ret, $ids, $attribute_types, $db, $core_resource->getTableName('catalog_product_entity_varchar'));
+        $this-> _loadProductPerStoreAttributesValues($ret, $ids, $attribute_types, $db, $core_resource->getTableName('catalog_product_entity_decimal'));
+        $this-> _loadProductPerStoreAttributesValues($ret, $ids, $attribute_types, $db, $core_resource->getTableName('catalog_product_entity_int'));
+
+        return $ret;
+    }
+    private function _loadProductPerStoreAttributesValues(&$ret, $ids, $attribute_types, $db, $table_name){
+        if (!$attribute_types) return array();
+        $attribute_ids = array_keys($attribute_types);
+
+        $select = $db->select()
+            ->from(
+                array(
+                    's' => $table_name
+                    ),
+                array('entity_id', 'store_id','attribute_id', 'value')
+                )
+            ->where('entity_id IN (?)', $ids)
+            ->where('attribute_id IN (?)', $attribute_ids);
+
+        $rows =  $db->fetchAll($select);
+
+        foreach($rows as $row){
+            $product_id = $row['entity_id'];
+            $attribute_id = $row['attribute_id'];
+            $key = $attribute_types[$attribute_id];
+            $value = $row['value'];
+            $store_id = $row['store_id'];
+            $ret[$product_id][$store_id][$key] = $value;
         }
     }
+
 
     /**
      * API method for listing order increment IDs updated between a provided date range.
@@ -344,13 +437,18 @@ class Ometria_Api_Model_Api extends Mage_Api_Model_Resource_Abstract {
         $ometria_product_helper = Mage::helper('ometria/product');
         $is_sku_mode = $ometria_product_helper->isSkuMode();
 
+        $lineitem_product_ids = array();
+
         $m = new Mage_Sales_Model_Order_Api();
         $ret = array();
         foreach($ids as $id){
             try{
                 $info = $m->info($id);
+                foreach($info['items'] as $item){
+                    $lineitem_product_ids[] = $item['product_id'];
+                }
 
-                if ($is_sku_mode && isset($info['items'])) {
+                /*if ($is_sku_mode && isset($info['items'])) {
                     $_items = $info['items'];
                     $items = array();
                     foreach($_items as $item){
@@ -359,13 +457,26 @@ class Ometria_Api_Model_Api extends Mage_Api_Model_Resource_Abstract {
                         $items[] = $item;
                     }
                     $info['items'] = $items;
-                }
+                }*/
 
             } catch(Exception $e){
                 $info = false;
             }
             $ret[$id] = $info;
         }
+
+        $lineitem_product_ids = array_values(array_unique($lineitem_product_ids));
+        $parent_product_ids = $this->_getParentProductsMapping($lineitem_product_ids);
+
+        foreach($ids as $id){
+            for($i=0;$i<count($ret[$id]['items']);$i++){
+                $item = $ret[$id]['items'][$i];
+                $product_id = $item['product_id'];
+                $parent_product_id = isset($parent_product_ids[$product_id]) ? $parent_product_ids[$product_id] : null;
+                $ret[$id]['items'][$i]['parent_product_id'] = $parent_product_id;
+            }
+        }
+
         return $ret;
     }
 
@@ -455,5 +566,76 @@ class Ometria_Api_Model_Api extends Mage_Api_Model_Resource_Abstract {
         if (!$pageSize) $pageSize = 50;
 
         return array($updatedFrom, $updatedTo, $page, $pageSize);
+    }
+
+    private function _getWebsitesIdStoreIdsMapping($website_ids){
+
+        $db = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $core_resource = Mage::getSingleton('core/resource');
+
+        $select = $db->select()
+            ->from(
+                array(
+                    's' => $core_resource->getTableName('core_store')
+                    ),
+                array(
+                    'store_id',
+                    'website_id'
+                    )
+                );
+
+        if (is_array($website_ids) && $website_ids){
+            $select->where('website_id IN (?)', $website_ids);
+        }
+
+        $rows = $db->fetchAll($select);
+        $ret = array();
+
+        foreach($rows as $row){
+            $website_id = $row['website_id'];
+            $store_id = $row['store_id'];
+
+            if (!isset($ret[$website_id])) $ret[$website_id] = array();
+            $ret[$website_id][] = $store_id;
+        }
+
+        return $ret;
+    }
+
+    private function _getStoreIdsForWebsiteIds($website_ids, $website_store_ids){
+        $ret = array();
+        foreach($website_ids as $website_id){
+            if (isset($website_store_ids[$website_id])) {
+                $ret = array_merge($ret, $website_store_ids[$website_id]);
+            }
+        }
+        return $ret;
+    }
+
+    private function _getParentProductsMapping($product_ids){
+        if (!$product_ids) return array();
+
+        $db = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $core_resource = Mage::getSingleton('core/resource');
+
+        $select = $db->select()
+            ->from(
+                array('r' => $core_resource->getTableName('catalog_product_relation')),
+                array('parent_id','child_id')
+                )
+            ->join(
+                array('p'=>$core_resource->getTableName('catalog_product_entity')),
+                'p.entity_id=r.parent_id'
+                )
+            ->where('r.child_id IN (?)', $product_ids)
+            ->where('p.type_id=?', 'configurable');
+        $rows = $db->fetchAll($select);
+
+        $ret = array();
+        foreach($rows as $row) {
+            $ret[$row['child_id']] = $row['parent_id'];
+        }
+
+        return $ret;
     }
 }

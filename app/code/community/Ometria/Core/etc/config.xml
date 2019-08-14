@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Ometria_Core>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </Ometria_Core>
     </modules>
 
@@ -77,25 +77,15 @@
                     </ometria_customer_save_after>
                 </observers>
             </customer_save_after>
-            <checkout_cart_add_product_complete>
+            <sales_quote_save_after>
                 <observers>
-                    <checkout_cart_update_item_complete>
+                    <ometria_sales_quote_save_after>
                         <type>singleton</type>
                         <class>ometria/observer_cart</class>
                         <method>basketUpdated</method>
-                    </checkout_cart_update_item_complete>
+                    </ometria_sales_quote_save_after>
                 </observers>
-            </checkout_cart_add_product_complete>
-            <sales_quote_remove_item>
-                <observers>
-                    <ometria_sales_quote_remove_item>
-                        <type>singleton</type>
-                        <class>ometria/observer_cart</class>
-                        <method>basketUpdated</method>
-                    </ometria_sales_quote_remove_item>
-                </observers>
-            </sales_quote_remove_item>
-
+            </sales_quote_save_after>
             <customer_login>
                 <observers>
                     <ometria_customer_login>

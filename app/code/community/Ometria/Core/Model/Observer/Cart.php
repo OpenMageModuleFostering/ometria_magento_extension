@@ -2,7 +2,12 @@
 
 class Ometria_Core_Model_Observer_Cart {
 
+
     public function basketUpdated(Varien_Event_Observer $observer){
+        // Return if admin area or API call
+        if (Mage::app()->getStore()->isAdmin()) return;
+        if (Mage::getSingleton('api/server')->getAdapter() != null) return;
+
         $this->updateBasketCookie();
     }
 
@@ -12,7 +17,7 @@ class Ometria_Core_Model_Observer_Cart {
         $ometria_cookiechannel_helper = Mage::helper('ometria/cookiechannel');
         $cart = Mage::getModel('checkout/cart')->getQuote();
 
-        $cart_token = md5($cart->created_at.$cart->remote_ip);
+        $cart_token = substr(md5($cart->created_at.$cart->getId()),0,12);
 
         $command = array(
                 'basket',
@@ -29,8 +34,9 @@ class Ometria_Core_Model_Observer_Cart {
             $buffer = array(
                 'i'=>$ometria_product_helper->getIdentifierForProduct($product),
                 //'s'=>$product->getSku(),
-                //'v'=>$item->getSku(),
-                'q'=>$item->getQty(),
+                'v'=>$item->getSku(),
+                'q'=>(int) $item->getQty(),
+                't'=>(float) $item->getRowTotalInclTax()
                 );
             $command_part = http_build_query($buffer);
             $command[] = $command_part;
@@ -40,6 +46,14 @@ class Ometria_Core_Model_Observer_Cart {
         }
 
         $ometria_cookiechannel_helper->addCommand($command, true);
+
+        // Identify if needed
+        if ($cart->getCustomerEmail()) {
+            $identify_type = 'checkout_billing';
+            $data = array('e'=>$cart->getCustomerEmail());
+            $command = array('identify', $identify_type, http_build_query($data));
+            $ometria_cookiechannel_helper->addCommand($command, true);
+        }
 
         return $this;
     }
@@ -56,8 +70,27 @@ class Ometria_Core_Model_Observer_Cart {
             if ($session_id) {
                 $ometria_ping_helper->sendPing('transaction', $order->getIncrementId(), array('session'=>$session_id));
             }
-
             $ometria_cookiechannel_helper->addCommand(array('trans', $order->getIncrementId()));
+
+            // If via front end, also identify via cookie channel (but do not replace if customer login has done it)
+            $is_frontend = true;
+            if (Mage::app()->getStore()->isAdmin()) $is_frontend=false;
+            if (Mage::getSingleton('api/server')->getAdapter() != null) $is_frontend=false;
+            if ($is_frontend){
+                $ometria_cookiechannel_helper = Mage::helper('ometria/cookiechannel');
+
+                if ($order->getCustomerIsGuest()){
+                    $identify_type = 'guest_checkout';
+                    $data = array('e'=>$order->getCustomerEmail());
+                } else {
+                    $identify_type = 'checkout';
+                    $customer = $order->getCustomer();
+                    $data = array('e'=>$customer->getEmail(),'i'=>$customer->getId());
+                }
+
+                $command = array('identify', $identify_type, http_build_query($data));
+                $ometria_cookiechannel_helper->addCommand($command, true);
+            }
         } catch(Exception $e){
             //pass
         }

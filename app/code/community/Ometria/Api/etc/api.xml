@@ -81,6 +81,10 @@
                 <title>Ometria API version 2</title>
                 <model>ometria_api/api2</model>
                 <methods>
+                    <stock_list translate="title" module="ometria_api">
+                        <title>Get full stock dump</title>
+                        <acl>ometria_api/read</acl>
+                    </stock_list>
                     <get_magento_info translate="title" module="ometria_api">
                         <title>Get Magento instance info</title>
                         <acl>ometria_api/read</acl>
@@ -146,6 +150,18 @@
                         <title>Create cart sales rule coupons</title>
                         <acl>ometria_api/create_coupon</acl>
                     </salesrules_create_coupons>
+                    <salesrules_create_specific_coupons translate="title" module="ometria_api">
+                        <title>Create cart sales rule coupons with specific codes</title>
+                        <acl>ometria_api/create_coupon</acl>
+                    </salesrules_create_specific_coupons>
+                    <salesrules_insert_coupons translate="title" module="ometria_api">
+                        <title>Insert existing cart sales rule coupons</title>
+                        <acl>ometria_api/create_coupon</acl>
+                    </salesrules_insert_coupons>
+                    <salesrules_remove_expired_coupons translate="title" module="ometria_api">
+                        <title>Remove expired coupons from sales rule</title>
+                        <acl>ometria_api/create_coupon</acl>
+                    </salesrules_remove_expired_coupons>
 
                     <subscribers_subscribe translate="title" module="ometria_api">
                         <title>Add subscribers</title>

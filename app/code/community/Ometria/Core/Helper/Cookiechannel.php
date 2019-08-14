@@ -9,6 +9,10 @@ class Ometria_Core_Helper_Cookiechannel extends Mage_Core_Helper_Abstract {
     public function addCommand($command, $replace_if_exists=false){
         if (!$command || !is_array($command)) return;
 
+        // Return if admin area or API call
+        if (Mage::app()->getStore()->isAdmin()) return;
+        if (Mage::getSingleton('api/server')->getAdapter() != null) return;
+
         $ometria_config_helper = Mage::helper('ometria/config');
         if (!$ometria_config_helper->isConfigured()) return;
         if (!$ometria_config_helper->isUnivarEnabled()) return;

@@ -30,16 +30,16 @@
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
                         </enabled>
                         <apikey translate="label" module="ometria">
                             <label>Ometria Site Identifier</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
                             <comment>
                                 <![CDATA[Sign up for an account at <a href="http://www.ometria.com/" target="_blank">Ometria.com</a>]]>
                             </comment>
@@ -63,8 +63,8 @@
                     <frontend_type>text</frontend_type>
                     <sort_order>30</sort_order>
                     <show_in_default>1</show_in_default>
-                    <show_in_website>0</show_in_website>
-                    <show_in_store>0</show_in_store>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
                     <fields>
                         <univar translate="label" module="ometria">
                             <label>Include Data Layer</label>
@@ -72,8 +72,8 @@
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
                         </univar>
                         <ping translate="label" module="ometria">
                             <label>Ping Ometria on record update</label>
@@ -90,8 +90,8 @@
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>12</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
                         </scriptload>
                         <debug translate="label" module="ometria">
                             <label>Debug Mode</label>
