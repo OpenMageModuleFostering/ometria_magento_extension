@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Ometria_Core>
-            <version>1.1.2</version>
+            <version>1.1.3</version>
         </Ometria_Core>
     </modules>
 
@@ -174,6 +174,13 @@
                     </modules>
                 </args>
             </adminhtml>
+            <ometria>
+                <use>admin</use>
+                <args>
+                    <module>Ometria_Core</module>
+                    <frontName>wizard</frontName>
+                </args>
+            </ometria>
         </routers>
     </admin>
 

@@ -15,6 +15,8 @@ class Ometria_Core_Model_Observer_Cart {
 
         $ometria_product_helper = Mage::helper('ometria/product');
         $ometria_cookiechannel_helper = Mage::helper('ometria/cookiechannel');
+
+        # Might not be updated @BUG
         $cart = Mage::getModel('checkout/cart')->getQuote();
 
         $cart_token = substr(md5($cart->created_at.$cart->getId()),0,12);
