@@ -7,7 +7,7 @@ class Ometria_Core_Helper_Ping extends Mage_Core_Helper_Abstract {
     const API_PATH = '/ping.php';
     const API_SOCKET_TIMEOUT = 2;
 
-    public function sendPing($type, $ids, $extra=array()){
+    public function sendPing($type, $ids, $extra=array(), $store_id=null){
         $ometriaConfigHelper = Mage::helper('ometria/config');
 
         if (!$ometriaConfigHelper->isConfigured()) {
@@ -26,7 +26,7 @@ class Ometria_Core_Helper_Ping extends Mage_Core_Helper_Abstract {
             }
         }
 
-        $extra['account']   =  $ometriaConfigHelper->getAPIKey();
+        $extra['account']   =  $ometriaConfigHelper->getAPIKey($store_id);
         $extra['type']      =  $type;
         $extra['id']        =  $ids;
 

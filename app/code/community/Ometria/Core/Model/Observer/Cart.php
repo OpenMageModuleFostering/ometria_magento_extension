@@ -68,7 +68,7 @@ class Ometria_Core_Model_Observer_Cart {
             $order = $observer->getEvent()->getOrder();
             $session_id = $ometria_session_helper->getSessionId();
             if ($session_id) {
-                $ometria_ping_helper->sendPing('transaction', $order->getIncrementId(), array('session'=>$session_id));
+                $ometria_ping_helper->sendPing('transaction', $order->getIncrementId(), array('session'=>$session_id), $order->store_id);
             }
             $ometria_cookiechannel_helper->addCommand(array('trans', $order->getIncrementId()));
 

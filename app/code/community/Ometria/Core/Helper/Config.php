@@ -23,8 +23,12 @@ class Ometria_Core_Helper_Config extends Mage_Core_Helper_Abstract {
         return Mage::getStoreConfigFlag('ometria/advanced/scriptload');
     }
 
-    public function getAPIKey() {
-        return Mage::getStoreConfig('ometria/general/apikey');
+    public function getAPIKey($store_id=null) {
+        if ($store_id) {
+            return Mage::getStoreConfig('ometria/general/apikey', $store_id);
+        } else {
+            return Mage::getStoreConfig('ometria/general/apikey');
+        }
     }
 
     public function isConfigured() {

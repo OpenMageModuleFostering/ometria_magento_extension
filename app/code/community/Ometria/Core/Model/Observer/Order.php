@@ -12,7 +12,7 @@ class Ometria_Core_Model_Observer_Order {
 
         $ometria_ping_helper = Mage::helper('ometria/ping');
         $order = $observer->getEvent()->getOrder();
-        $ometria_ping_helper->sendPing('transaction', $order->getIncrementId());
+        $ometria_ping_helper->sendPing('transaction', $order->getIncrementId(), array(), $order->store_id);
 
         return $this;
     }

@@ -8,7 +8,7 @@ class Ometria_Core_Model_Observer_Customer {
 
         $ometria_ping_helper = Mage::helper('ometria/ping');
         $order = $observer->getEvent()->getCustomer();
-        $ometria_ping_helper->sendPing('customer', $order->getId());
+        $ometria_ping_helper->sendPing('customer', $order->getId(), array(), $customer->store_id);
 
         return $this;
     }
