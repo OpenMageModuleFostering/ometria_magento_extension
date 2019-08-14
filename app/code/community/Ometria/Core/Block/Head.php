@@ -17,6 +17,7 @@ class Ometria_Core_Block_Head extends Mage_Core_Block_Template {
     const OM_PAGE_TYPE           = 'type';
     const OM_PAGE_DATA           = 'data';
 
+
     public function getDataLayer() {
         $category = 'null';
         $page = array();
@@ -44,6 +45,7 @@ class Ometria_Core_Block_Head extends Mage_Core_Block_Template {
         } elseif ($this->_isProduct()) {
             $page[self::OM_PAGE_TYPE] = self::PAGE_TYPE_PRODUCT;
             $page[self::OM_PAGE_DATA] = $this->_getProductPageData();
+
         } elseif ($this->_isBasket()) {
             $page[self::OM_PAGE_TYPE] = self::PAGE_TYPE_BASKET;
 
@@ -114,23 +116,6 @@ class Ometria_Core_Block_Head extends Mage_Core_Block_Template {
         return false;
     }
 
-    protected function _getProductInStock($product)
-    {
-        $stock = false;
-        if ($product) {
-            $api = Mage::getModel('cataloginventory/stock_item_api');
-            $stock_objects = $api->items(array($product->getId()));
-            $stock = array_shift($stock_objects);
-        }
-
-        if($stock && array_key_exists('is_in_stock', $stock))
-        {
-            return (boolean) $stock['is_in_stock'];
-        }
-
-        return null;
-    }
-
     /**
      * Get limited product info from product
      * Used in listing, baskets, transactions
@@ -142,16 +127,10 @@ class Ometria_Core_Block_Head extends Mage_Core_Block_Template {
 
         if($product instanceof Mage_Catalog_Model_Product) {
             return array(
-                'id'                        => $ometria_product_helper->getIdentifierForProduct($product),
-                'sku'                       => $product->getSku(),
-                'name'                      => $product->getName(),
-                'url'                       => $product->getProductUrl(),
-                'in_stock'                  => $this->_getProductInStock($product),
-                'is_available'              => method_exists($product, 'isAvailable') ? $product->isAvailable() : null,
-                'is_saleable'               => method_exists($product, 'isSaleable') ? $product->isSaleable() : null,
-                'is_getsaleable'            => method_exists($product, 'getIsSalable') ? $product->getIsSalable() : null,
-                'price'                     => method_exists($product, 'getFinalPrice') ? $product->getFinalPrice() : null,
-                'currency'                  => Mage::app()->getStore()->getCurrentCurrencyCode()
+                'id'                              => $ometria_product_helper->getIdentifierForProduct($product),
+                'sku'                        => $product->getSku(),
+                'name'                            => $product->getName(),
+                'url'                             => $product->getProductUrl()
             );
         }
 

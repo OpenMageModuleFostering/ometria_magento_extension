@@ -2,9 +2,6 @@
 
 class Ometria_Core_Model_Observer_Newsletter {
     public function handleSubscriberUpdate(Varien_Event_Observer $observer){
-        $ometria_config_helper = Mage::helper('ometria/config');
-        if (!$ometria_config_helper->isConfigured()) return;
-
         $ometria_ping_helper = Mage::helper('ometria/ping');
 
         $subscriber = $observer->getEvent()->getSubscriber();
@@ -16,8 +13,6 @@ class Ometria_Core_Model_Observer_Newsletter {
             $status_change = true;
         } elseif (isset($original_data['subscriber_status'])) {
             $status_change = $data['subscriber_status'] != $original_data['subscriber_status'];
-        } else {
-            $status_change = false;
         }
 
         // Only if status has changed
@@ -39,7 +34,7 @@ class Ometria_Core_Model_Observer_Newsletter {
             $ometria_cookiechannel_helper = Mage::helper('ometria/cookiechannel');
             $data = array('e'=>$subscriber->getEmail());
             $command = array('identify', 'newsletter', http_build_query($data));
-            $ometria_cookiechannel_helper->addCommand($command, true);
+            $ometria_cookiechannel_helper->addCommand($command, false);
         }
     }
 
