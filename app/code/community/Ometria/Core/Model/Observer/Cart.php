@@ -52,15 +52,22 @@ class Ometria_Core_Model_Observer_Cart {
             if ($count>30) break; // Prevent overly long cookies
         }
 
-        $ometria_cookiechannel_helper->addCommand($command, true);
+        $ometria_cookiechannel_helper->addCommand($command, true, false);
 
         // Identify if needed
         if ($quote->getCustomerEmail()) {
             $identify_type = 'checkout_billing';
             $data = array('e'=>$quote->getCustomerEmail());
+            $customer = $quote->getCustomer();
+            if ($customer) {
+                // Also set customer ID
+                $data['i'] = $customer->getId();
+            }
             $command = array('identify', $identify_type, http_build_query($data));
-            $ometria_cookiechannel_helper->addCommand($command, true);
+            $ometria_cookiechannel_helper->addCommand($command, true, false);
         }
+
+        $ometria_cookiechannel_helper->sendCookie();
 
         return $this;
     }
@@ -80,7 +87,7 @@ class Ometria_Core_Model_Observer_Cart {
             if ($session_id) {
                 $ometria_ping_helper->sendPing('transaction', $order->getIncrementId(), array('session'=>$session_id), $order->store_id);
             }
-            $ometria_cookiechannel_helper->addCommand(array('trans', $order->getIncrementId()));
+            $ometria_cookiechannel_helper->addCommand(array('trans', $order->getIncrementId()), false, false);
 
             // If via front end, also identify via cookie channel (but do not replace if customer login has done it)
             $is_frontend = true;
@@ -99,10 +106,12 @@ class Ometria_Core_Model_Observer_Cart {
                 }
 
                 $command = array('identify', $identify_type, http_build_query($data));
-                $ometria_cookiechannel_helper->addCommand($command, true);
+                $ometria_cookiechannel_helper->addCommand($command, true, false);
             }
         } catch(Exception $e){
             //pass
         }
+
+        $ometria_cookiechannel_helper->sendCookie();
     }
 }

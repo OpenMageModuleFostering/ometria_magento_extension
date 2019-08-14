@@ -37,7 +37,7 @@ class Ometria_Core_Model_Observer_Newsletter {
             $ometria_cookiechannel_helper = Mage::helper('ometria/cookiechannel');
             $data = array('e'=>$subscriber->getEmail());
             $command = array('identify', 'newsletter', http_build_query($data));
-            $ometria_cookiechannel_helper->addCommand($command, false);
+            $ometria_cookiechannel_helper->addCommand($command, true);
         }
     }
 
