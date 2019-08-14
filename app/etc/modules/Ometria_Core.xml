@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Ometria_Core>
+            <active>true</active>
+            <codePool>community</codePool>
+            <depends>
+                <Mage_Catalog />
+                <Mage_Customer />
+                <Mage_Sales />
+            </depends>
+        </Ometria_Core>
+    </modules>
+</config>

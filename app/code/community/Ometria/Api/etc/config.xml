@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Ometria_Api>
+            <version>1.0.0</version>
+        </Ometria_Api>
+    </modules>
+
+    <global>
+        <blocks>
+            <ometria_api>
+                <class>Ometria_Api_Block</class>
+            </ometria_api>
+        </blocks>
+        <models>
+            <ometria_api>
+                <class>Ometria_Api_Model</class>
+            </ometria_api>
+        </models>
+        <helpers>
+            <ometria_api>
+                <class>Ometria_Api_Helper</class>
+            </ometria_api>
+        </helpers>
+    </global>
+
+    <phpunit>
+        <suite>
+            <modules>
+                <Ometria_Api />
+            </modules>
+        </suite>
+    </phpunit>
+</config>

@@ -1,0 +1,193 @@
+<config>
+    <api>
+        <resources>
+            <ometria_api translate="title" module="ometria_api">
+                <title>Ometria API version 1</title>
+                <model>ometria_api/api</model>
+                <methods>
+                    <version translate="title" module="ometria_api">
+                        <title>Get ometria API version info</title>
+                        <acl>ometria_api/read</acl>
+                    </version>
+                    <get_stock_levels translate="title" module="ometria_api">
+                        <title>Get stock levels</title>
+                        <acl>ometria_api/read</acl>
+                    </get_stock_levels>
+                    <list_stores translate="title" module="ometria_api">
+                        <title>Get list of stores</title>
+                        <acl>ometria_api/read</acl>
+                    </list_stores>
+                    <list_categories translate="title" module="ometria_api">
+                        <title>Get list of categories</title>
+                        <acl>ometria_api/read</acl>
+                    </list_categories>
+                    <list_attributes translate="title" module="ometria_api">
+                        <title>Get list of attributes</title>
+                        <acl>ometria_api/read</acl>
+                    </list_attributes>
+                    <list_attribute_options translate="title" module="ometria_api">
+                        <title>Get list of attribute options</title>
+                        <acl>ometria_api/read</acl>
+                    </list_attribute_options>
+                    <list_subscribers translate="title" module="ometria_api">
+                        <title>List newsletter subscribers</title>
+                        <acl>ometria_api/read</acl>
+                    </list_subscribers>
+                    <list_products translate="title" module="ometria_api">
+                        <title>Retrive all products IDs or all products IDs between two timestamps</title>
+                        <acl>ometria_api/read</acl>
+                    </list_products>
+                    <list_transactions translate="title" module="ometria_api">
+                        <title>Retrive all transaction IDs or all products IDs between two timestamps</title>
+                        <acl>ometria_api/read</acl>
+                    </list_transactions>
+                    <list_customers translate="title" module="ometria_api">
+                        <title>Retrive all customer IDs or all customer IDs between two timestamps</title>
+                        <acl>ometria_api/read</acl>
+                    </list_customers>
+                    <get_products translate="title" module="ometria_api">
+                        <title>Get multiple products by a list of IDs</title>
+                        <acl>ometria_api/read</acl>
+                    </get_products>
+                    <get_transactions translate="title" module="ometria_api">
+                        <title>Get multiple products by a list of IDs</title>
+                        <acl>ometria_api/read</acl>
+                    </get_transactions>
+                    <get_customers translate="title" module="ometria_api">
+                        <title>Get multiple customers by a list of IDs</title>
+                        <acl>ometria_api/read</acl>
+                    </get_customers>
+                    <product_collection_size translate="title" module="ometria_api">
+                        <title>Count all products between two timestamps</title>
+                        <acl>ometria_api/read</acl>
+                    </product_collection_size>
+                    <transaction_collection_size translate="title" module="ometria_api">
+                        <title>Count all transactions between two timestamps</title>
+                        <acl>ometria_api/read</acl>
+                    </transaction_collection_size>
+                    <customer_collection_size translate="title" module="ometria_api">
+                        <title>Count all customers between two timestamps</title>
+                        <acl>ometria_api/read</acl>
+                    </customer_collection_size>
+                </methods>
+                <faults module="ometria_api">
+                    <data_invalid>
+                        <code>1000</code>
+                        <message>Invalid input data. Details in error message.</message>
+                    </data_invalid>
+                </faults>
+            </ometria_api>
+            <ometria_api2 translate="title" module="ometria_api">
+                <title>Ometria API version 2</title>
+                <model>ometria_api/api2</model>
+                <methods>
+                    <get_magento_info translate="title" module="ometria_api">
+                        <title>Get Magento instance info</title>
+                        <acl>ometria_api/read</acl>
+                    </get_magento_info>
+                    <get_settings translate="title" module="ometria_api">
+                        <title>Get Ometria Magento extension settings</title>
+                        <acl>ometria_api/read</acl>
+                    </get_settings>
+                    <set_settings translate="title" module="ometria_api">
+                        <title>Set Ometria Magento extension settings</title>
+                        <acl>ometria_api/read</acl>
+                    </set_settings>
+
+
+                    <customers_list translate="title" module="ometria_api">
+                        <title>List customers</title>
+                        <acl>ometria_api/read</acl>
+                    </customers_list>
+                    <products_list translate="title" module="ometria_api">
+                        <title>List products</title>
+                        <acl>ometria_api/read</acl>
+                    </products_list>
+
+                    <products_flat_list translate="title" module="ometria_api">
+                        <title>Get flat product catalog</title>
+                        <acl>ometria_api/read</acl>
+                    </products_flat_list>
+                    <product_attributes_list translate="title" module="ometria_api">
+                        <title>List all product attributes</title>
+                        <acl>ometria_api/read</acl>
+                    </product_attributes_list>
+                    <orders_list translate="title" module="ometria_api">
+                        <title>List orders</title>
+                        <acl>ometria_api/read</acl>
+                    </orders_list>
+                    <orders_count translate="title" module="ometria_api">
+                        <title>Count orders</title>
+                        <acl>ometria_api/read</acl>
+                    </orders_count>
+                    <orders_statuses_list translate="title" module="ometria_api">
+                        <title>List order statuses</title>
+                        <acl>ometria_api/read</acl>
+                    </orders_statuses_list>
+                    <stores_list translate="title" module="ometria_api">
+                        <title>List stores / websites</title>
+                        <acl>ometria_api/read</acl>
+                    </stores_list>
+                    <carts_list translate="title" module="ometria_api">
+                        <title>List carts</title>
+                        <acl>ometria_api/read</acl>
+                    </carts_list>
+
+
+                    <salesrules_list translate="title" module="ometria_api">
+                        <title>List cart sales rules</title>
+                        <acl>ometria_api/read</acl>
+                    </salesrules_list>
+                    <salesrules_list_coupons translate="title" module="ometria_api">
+                        <title>List cart sales rule coupons</title>
+                        <acl>ometria_api/read</acl>
+                    </salesrules_list_coupons>
+                    <salesrules_create_coupons translate="title" module="ometria_api">
+                        <title>Create cart sales rule coupons</title>
+                        <acl>ometria_api/create_coupon</acl>
+                    </salesrules_create_coupons>
+
+                    <subscribers_subscribe translate="title" module="ometria_api">
+                        <title>Add subscribers</title>
+                        <acl>ometria_api/change_subscribers</acl>
+                    </subscribers_subscribe>
+                    <subscribers_unsubscribe translate="title" module="ometria_api">
+                        <title>Remove subscribers</title>
+                        <acl>ometria_api/change_subscribers</acl>
+                    </subscribers_unsubscribe>
+                    <subscribers_list translate="title" module="ometria_api">
+                        <title>List all subscribers</title>
+                        <acl>ometria_api/read</acl>
+                    </subscribers_list>
+                </methods>
+                <faults module="ometria_api">
+                    <data_invalid>
+                        <code>1000</code>
+                        <message>Invalid input data. Details in error message.</message>
+                    </data_invalid>
+                </faults>
+            </ometria_api2>
+        </resources>
+
+        <acl>
+            <resources>
+                <ometria_api translate="title" module="ometria_api">
+                    <title>Ometria API</title>
+                    <acl>ometria_api</acl>
+                    <read translate="title" module="ometria_api">
+                        <title>Read from Ometria API</title>
+                        <acl>ometria_api/read</acl>
+                    </read>
+                    <create_coupon translate="title" module="ometria_api">
+                        <title>Create coupons via Ometria API</title>
+                        <acl>ometria_api/create_coupon</acl>
+                    </create_coupon>
+                    <change_subscribers translate="title" module="ometria_api">
+                        <title>Add and alter subscribers via API</title>
+                        <acl>ometria_api/change_subscribers</acl>
+                    </change_subscribers>
+                </ometria_api>
+            </resources>
+        </acl>
+    </api>
+</config>

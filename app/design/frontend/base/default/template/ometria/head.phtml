@@ -1,0 +1,28 @@
+<?php
+    /** @var Ometria_Core_Helper_Config $_helper */
+    $_helper = Mage::helper('ometria/config');
+    /** @var Ometria_Core_Block_Head $this */
+?>
+<?php if ($_helper->isConfigured()) :?>
+    <script type="text/javascript">
+        <?php if ($_helper->isUnivarEnabled()) :?>
+
+            window.ometria = window.ometria || {};
+            window.ometria.raw_data = <?php echo json_encode($this->getDataLayer()) ?>;
+
+        <?php endif; ?>
+        <?php if ($_helper->isScriptDeferred()) :?>
+        document.observe("dom:loaded", function(){
+            var url=window.location.protocol+"//cdn.ometria.com/tags/<?php echo $_helper->getAPIKey() ?>.js";
+            var sc=document.createElement('script');sc.src=url;sc.setAttribute('async','true');
+            document.getElementsByTagName("head")[0].appendChild(sc);
+        });
+        <?php else: ?>
+        (function(){
+            var url=window.location.protocol+"//cdn.ometria.com/tags/<?php echo $_helper->getAPIKey() ?>.js";
+            setTimeout(function(){var sc=document.createElement('script');sc.src=url;sc.setAttribute('async','true');
+            document.getElementsByTagName("head")[0].appendChild(sc);},50);
+        })();
+        <?php endif; ?>
+    </script>
+<?php endif; ?>

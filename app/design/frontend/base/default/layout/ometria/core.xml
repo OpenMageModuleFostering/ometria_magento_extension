@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<layout>
+    <default>
+        <reference name="head">
+            <block type="ometria/head" name="ometria.head" as="ometria.head" template="ometria/head.phtml" ifconfig="ometria/general/enabled"/>
+        </reference>
+    </default>
+
+    <checkout_onepage_index>
+        <reference name="head">
+            <action method="addJs"><script>ometria/checkout.js</script></action>
+        </reference>
+    </checkout_onepage_index>
+</layout>

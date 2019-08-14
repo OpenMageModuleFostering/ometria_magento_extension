@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Ometria_AbandonedCarts>
+            <active>true</active>
+            <codePool>community</codePool>
+        </Ometria_AbandonedCarts>
+    </modules>
+</config>

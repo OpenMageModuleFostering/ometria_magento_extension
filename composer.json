@@ -1,0 +1,17 @@
+{
+    "name": "OpenMageModuleFostering/Ometria_Magento_Extension",
+    "type": "magento-module",
+    "license": "Open-Source-License-(OSL)",
+    "homepage": "",
+    "description": "Radically simple ecommerce analytics
+",
+    "authors": [
+    {
+        "name": "Alastair James",
+        "email": "al.james@gmail.com"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

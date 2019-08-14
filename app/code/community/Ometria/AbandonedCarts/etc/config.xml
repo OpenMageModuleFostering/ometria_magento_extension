@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Ometria_AbandonedCarts>
+            <version>1.0.0</version>
+        </Ometria_AbandonedCarts>
+    </modules>
+
+    <global>
+        <helpers>
+            <ometria_abandonedcarts>
+                <class>Ometria_AbandonedCarts_Helper</class>
+            </ometria_abandonedcarts>
+        </helpers>
+    </global>
+
+    <frontend>
+        <routers>
+            <omcart>
+                <use>standard</use>
+                <args>
+                    <module>Ometria_AbandonedCarts</module>
+                    <frontName>omcart</frontName>
+                </args>
+            </omcart>
+        </routers>
+    </frontend>
+
+    <default>
+        <ometria_abandonedcarts>
+            <abandonedcarts>
+                <cartpath>checkout/cart</cartpath>
+                <enabled>1</enabled>
+                <check_token>1</check_token>
+            </abandonedcarts>
+        </ometria_abandonedcarts>
+    </default>
+
+    <adminhtml>
+        <acl>
+            <resources>
+                <admin>
+                    <children>
+                        <system>
+                            <children>
+                                <config>
+                                    <children>
+                                        <ometria_abandonedcarts>
+                                            <title>Ometria Cart Abandonment</title>
+                                        </ometria_abandonedcarts>
+                                    </children>
+                                </config>
+                            </children>
+                        </system>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
+    </adminhtml>
+</config>

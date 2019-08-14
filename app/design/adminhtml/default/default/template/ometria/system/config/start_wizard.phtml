@@ -1,0 +1,14 @@
+<button class="scalable" type="button" id="ometria-start-wizard">
+    <span><?php echo $this->getButtonLabel() ?></span>
+</button>
+
+<script type="text/javascript">
+    $('ometria-start-wizard').observe('click', function(e) {
+        <?php if ($this->canOpenWizard()): ?>
+            var url = "<?php echo $this->getButtonUrl(); ?>";
+            popWin(url, 'ometria_wizard','toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=no, left=200, top=100, width=1000, height=900');
+        <?php else: ?>
+            alert('Unable to open wizard. Please make sure you have a valid Ometria Site Identifier inserted above and have clicked "Save Config".')
+        <?php endif; ?>
+    });
+</script>

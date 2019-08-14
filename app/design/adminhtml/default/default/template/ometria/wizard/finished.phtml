@@ -1,0 +1,19 @@
+<div class="content-header">
+    <h3 class="icon-head head-adminhtml-wizard">Ometria Setup Wizard</h3>
+    <p class="form-buttons"><button title="<?php echo $this->__('Finished') ?>" type="button" class="scalable save" onclick="window.close()" style=""><span><span><span><?php echo $this->__('Finished') ?></span></span></span></button></p>
+</div>
+<?php /** @var $this Ometria_Core_Block_Adminhtml_Wizard_Finished */ ?>
+<?php $_results = $this->getResults(); ?>
+<?php $_wasSuccessful = $this->getWasSuccessful(); ?>
+
+<?php if ($_wasSuccessful): ?>
+    <h1>Success!</h1>
+<?php else: ?>
+    <h1>Failure</h1>
+<?php endif; ?>
+<h4>Details</h4>
+<ul>
+    <?php foreach ($_results as $_result): ?>
+        <li><strong><?php echo strtoupper($_result['status']) ?></strong> <?php echo $_result['message'] ?></li>
+    <?php endforeach; ?>
+</ul>

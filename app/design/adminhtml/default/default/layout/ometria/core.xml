@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<layout>
+    <ometria_wizard_index>
+        <update handle="popup"/>
+        <reference name="content">
+            <block name="ometria.core.wizard.start" type="ometria/adminhtml_wizard_start"></block>
+        </reference>
+    </ometria_wizard_index>
+
+    <ometria_wizard_finished>
+        <update handle="popup"/>
+        <reference name="content">
+            <block name="ometria.core.wizard.start" type="ometria/adminhtml_wizard_finished" template="ometria/wizard/finished.phtml"></block>
+        </reference>
+    </ometria_wizard_finished>
+</layout>
