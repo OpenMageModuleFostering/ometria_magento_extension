@@ -11,7 +11,8 @@ class Ometria_Core_Helper_Cookiechannel extends Mage_Core_Helper_Abstract {
 
         // Return if admin area or API call
         if (Mage::app()->getStore()->isAdmin()) return;
-        if (Mage::getSingleton('api/server')->getAdapter() != null) return;
+        //if (Mage::getSingleton('api/server')->getAdapter() != null) return;
+        if (isset($_SERVER['REQUEST_URI']) && stripos($_SERVER['REQUEST_URI'], "/api")) return;
 
         $ometria_config_helper = Mage::helper('ometria/config');
         if (!$ometria_config_helper->isConfigured()) return;
@@ -24,28 +25,28 @@ class Ometria_Core_Helper_Cookiechannel extends Mage_Core_Helper_Abstract {
 
     private function appendCookieCommand($command_name, $str, $replace_if_exists=false){
         $existing_cookie = isset($_COOKIE[self::COOKIE_NAME]) ? $_COOKIE[self::COOKIE_NAME] : '';
-        $new_cookie = '';
+        $commands = explode(self::SEPERATOR_BETWEEN_COMMANDS, $existing_cookie);
 
-        if ($replace_if_exists && $existing_cookie) {
-            $_commands = explode(self::SEPERATOR_BETWEEN_COMMANDS, $existing_cookie);
-            $commands = array();
-            foreach($_commands as $command){
+        if ($replace_if_exists && $commands) {
+            $commands_filtered = array();
+            foreach($commands as $command){
                 if (strpos($command, $command_name.self::SEPERATOR_IN_COMMANDS)!==0) {
-                    $commands[] = $command;
+                    $commands_filtered[] = $command;
                 }
             }
-            $commands = array_filter($commands);
-            $existing_cookie = implode(self::SEPERATOR_BETWEEN_COMMANDS, $commands);
+            $commands = $commands_filtered;
         }
 
-        if ($existing_cookie){
+        $commands[] = $str;
+        if (count($commands)>6) $commands = array_slice($commands, 0, 6);
 
-            $new_cookie = $existing_cookie.self::SEPERATOR_BETWEEN_COMMANDS.$str;
-        } else {
-            $new_cookie = $str;
-        }
+        $commands = array_unique($commands);
+        $commands = array_filter($commands);
+        $commands = array_values($commands);
+        $new_cookie = implode(self::SEPERATOR_BETWEEN_COMMANDS, $commands);
+        if (strlen($new_cookie)>1000) $new_cookie = '';
 
         $_COOKIE[self::COOKIE_NAME] = $new_cookie;
-        setcookie(self::COOKIE_NAME, $new_cookie, 0, '/');
+        if (!headers_sent()) setcookie(self::COOKIE_NAME, $new_cookie, 0, '/');
     }
 }

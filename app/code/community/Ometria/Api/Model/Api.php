@@ -217,6 +217,7 @@ class Ometria_Api_Model_Api extends Mage_Api_Model_Resource_Abstract {
                     $info['product_id'] = $info['sku'];
                 } else {
                     $info = $m->info($id);
+                    $info['product_id'] = $id;
                 }
 
                 // Additional code to return parent information if available

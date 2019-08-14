@@ -7,6 +7,8 @@ class Ometria_Core_Helper_Ping extends Mage_Core_Helper_Abstract {
     const API_PATH = '/ping.php';
     const API_SOCKET_TIMEOUT = 2;
 
+    private static $_PING_CACHE=array();
+
     public function sendPing($type, $ids, $extra=array(), $store_id=null){
         $ometriaConfigHelper = Mage::helper('ometria/config');
 
@@ -33,6 +35,7 @@ class Ometria_Core_Helper_Ping extends Mage_Core_Helper_Abstract {
         return $this->_ping($extra);
     }
 
+
     /**
      * Helper function to ping ometria.  Manually doing an fsockopen
      * so that we don't have to wait for a response. Unless debugging
@@ -42,10 +45,14 @@ class Ometria_Core_Helper_Ping extends Mage_Core_Helper_Abstract {
      *
      * @return bool
      */
+
     protected function _ping($parameters = array()) {
 
-        //file_put_contents('/tmp/ping', json_encode($parameters)."\n", FILE_APPEND);
-        //return true;
+        // Check cache
+        $ping_signature = json_encode(array($parameters['type'], $parameters['id']));
+        if (isset(self::$_PING_CACHE[$ping_signature])) return;
+        self::$_PING_CACHE[$ping_signature] = true;
+        //
 
         $ometriaConfigHelper = Mage::helper('ometria/config');
 
