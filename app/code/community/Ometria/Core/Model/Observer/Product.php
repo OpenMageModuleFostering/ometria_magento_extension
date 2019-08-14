@@ -13,6 +13,9 @@ class Ometria_Core_Model_Observer_Product {
     public function catalogProductDeleteAfter(Varien_Event_Observer $observer) {
         Varien_Profiler::start("Ometria::" . __METHOD__);
 
+        $ometria_config_helper = Mage::helper('ometria/config');
+        if (!$ometria_config_helper->isConfigured()) return;
+
         $product = $observer->getEvent()->getProduct();
         $this->updateProducts($product->getId());
 
@@ -29,6 +32,9 @@ class Ometria_Core_Model_Observer_Product {
      */
     public function catalogProductSaveAfter(Varien_Event_Observer $observer) {
         Varien_Profiler::start("Ometria::" . __METHOD__);
+
+        $ometria_config_helper = Mage::helper('ometria/config');
+        if (!$ometria_config_helper->isConfigured()) return;
 
         $product = $observer->getEvent()->getProduct();
         $this->updateProducts($product->getId());
@@ -47,6 +53,9 @@ class Ometria_Core_Model_Observer_Product {
     public function catalogProductUpdateAttributes(Varien_Event_Observer $observer) {
         Varien_Profiler::start("Ometria::" . __METHOD__);
 
+        $ometria_config_helper = Mage::helper('ometria/config');
+        if (!$ometria_config_helper->isConfigured()) return;
+
         $productIds = Mage::helper('adminhtml/catalog_product_edit_action_attribute')->getProductIds();
         $this->updateProducts($productIds);
 
@@ -63,6 +72,9 @@ class Ometria_Core_Model_Observer_Product {
      */
     public function catalogProductUpdateStatus(Varien_Event_Observer $observer) {
         Varien_Profiler::start("Ometria::" . __METHOD__);
+
+        $ometria_config_helper = Mage::helper('ometria/config');
+        if (!$ometria_config_helper->isConfigured()) return;
 
         $productIds = Mage::app()->getFrontController()->getRequest()->getParam('product');
         $this->updateProducts($productIds);

@@ -6,22 +6,34 @@ class Ometria_Core_Model_Observer_Customer {
 
     public function customerSaveAfter(Varien_Event_Observer $observer) {
 
+        $ometria_config_helper = Mage::helper('ometria/config');
+        if (!$ometria_config_helper->isConfigured()) return;
+
         $ometria_ping_helper = Mage::helper('ometria/ping');
-        $order = $observer->getEvent()->getCustomer();
-        $ometria_ping_helper->sendPing('customer', $order->getId(), array(), $customer->store_id);
+        $customer = $observer->getEvent()->getCustomer();
+        $ometria_ping_helper->sendPing('customer', $customer->getId(), array(), $customer->getStoreId());
 
         return $this;
     }
 
     public function loggedOut(Varien_Event_Observer $observer){
+        $ometria_config_helper = Mage::helper('ometria/config');
+        if (!$ometria_config_helper->isConfigured()) return;
+
         $this->identify('logout');
     }
 
     public function loggedIn(Varien_Event_Observer $observer){
+        $ometria_config_helper = Mage::helper('ometria/config');
+        if (!$ometria_config_helper->isConfigured()) return;
+
         $this->identify('login');
     }
 
     public function registered(Varien_Event_Observer $observer){
+        $ometria_config_helper = Mage::helper('ometria/config');
+        if (!$ometria_config_helper->isConfigured()) return;
+
         $this->did_register = true;
         $this->identify('register');
     }
@@ -34,10 +46,10 @@ class Ometria_Core_Model_Observer_Customer {
         }
 
         $customer = Mage::getSingleton('customer/session')->getCustomer();
-        //if (!$customer) return;
-        $data = array('e'=>$customer->getEmail(),'i'=>$customer->getId());
-        $command = array('identify', $event, http_build_query($data));
-
-        $ometria_cookiechannel_helper->addCommand($command, true);
+        if ($customer) {
+            $data = array('e'=>$customer->getEmail(),'i'=>$customer->getId());
+            $command = array('identify', $event, http_build_query($data));
+            $ometria_cookiechannel_helper->addCommand($command, true);
+        }
     }
 }
