@@ -16,6 +16,8 @@ class Ometria_Core_Model_Observer_Newsletter {
             $status_change = true;
         } elseif (isset($original_data['subscriber_status'])) {
             $status_change = $data['subscriber_status'] != $original_data['subscriber_status'];
+        } else {
+            $status_change = false;
         }
 
         // Only if status has changed

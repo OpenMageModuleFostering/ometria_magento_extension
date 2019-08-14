@@ -17,6 +17,7 @@ class Ometria_Core_Block_Head extends Mage_Core_Block_Template {
     const OM_PAGE_TYPE           = 'type';
     const OM_PAGE_DATA           = 'data';
 
+    const PRODUCT_IN_STOCK       = 'in_stock';
 
     public function getDataLayer() {
         $category = 'null';
@@ -45,7 +46,6 @@ class Ometria_Core_Block_Head extends Mage_Core_Block_Template {
         } elseif ($this->_isProduct()) {
             $page[self::OM_PAGE_TYPE] = self::PAGE_TYPE_PRODUCT;
             $page[self::OM_PAGE_DATA] = $this->_getProductPageData();
-
         } elseif ($this->_isBasket()) {
             $page[self::OM_PAGE_TYPE] = self::PAGE_TYPE_BASKET;
 
@@ -101,6 +101,29 @@ class Ometria_Core_Block_Head extends Mage_Core_Block_Template {
         return Mage::getSingleton('checkout/session');
     }
 
+    protected function _getProductInStock($product)
+    {
+        /*$product = Mage::registry("current_product");
+
+        if (!$product && $id = $this->getProductId()) {
+            $product = Mage::getModel("catalog/product")->load($id);
+        }*/
+
+        $stock = false;
+        if ($product) {
+            $api = Mage::getModel('cataloginventory/stock_item_api');
+            $stock_objects = $api->items(array($product->getId()));
+            $stock = array_shift($stock_objects);
+        }
+
+        if($stock && array_key_exists('is_in_stock', $stock))
+        {
+            return (boolean) $stock['is_in_stock'];
+        }
+
+        return null;
+    }
+
     protected function _getProductPageData(){
 
         $product = Mage::registry("current_product");
@@ -127,10 +150,11 @@ class Ometria_Core_Block_Head extends Mage_Core_Block_Template {
 
         if($product instanceof Mage_Catalog_Model_Product) {
             return array(
-                'id'                              => $ometria_product_helper->getIdentifierForProduct($product),
-                'sku'                        => $product->getSku(),
-                'name'                            => $product->getName(),
-                'url'                             => $product->getProductUrl()
+                'id'                        => $ometria_product_helper->getIdentifierForProduct($product),
+                'sku'                       => $product->getSku(),
+                'name'                      => $product->getName(),
+                'url'                       => $product->getProductUrl(),
+                self::PRODUCT_IN_STOCK      => $this->_getProductInStock($product)
             );
         }
 
