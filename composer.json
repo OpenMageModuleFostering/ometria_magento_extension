@@ -1,5 +1,7 @@
 {
     "keywords": [
         "openmage-module"
-    ]
+    ],
+    "name": "openmage-module-fostering\/ometria_magento_extension",
+    "license": "OSL-3.0"
 }
